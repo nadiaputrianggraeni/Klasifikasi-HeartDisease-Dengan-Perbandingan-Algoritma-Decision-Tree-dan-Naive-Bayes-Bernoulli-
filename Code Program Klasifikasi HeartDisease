@@ -1,0 +1,235 @@
+#LOAD DATA
+#Import library pandas untuk membaca dataset
+import pandas as pd
+
+data = pd.read_csv("/content/heart.csv")
+#Menampilkan dataset
+data
+
+#Pair plot untuk melihat sebaran antar beberapa variabel
+import seaborn as sns
+import matplotlib.pyplot as plt
+sns.pairplot(data, hue = 'HeartDisease')
+plt.suptitle('Pair Plot untuk Dataset Heart Disease', y = 1.02)
+plt.show()
+
+data.dtypes
+data.describe()
+data.shape
+data.columns
+data.info()
+data.isna().sum()
+data.drop([503])
+
+#Menghitung nilai rata-rata dari kolom 'Age'
+mean_age = data['Age'].mean()
+
+#Mengisi nilai yang hilang dengan nilai rata-rata
+data['Age'] = data['Age'].fillna(mean_age)
+
+#Mengubah tipe data kolom Age menjadi integer agar angkanya bulat
+data['Age'] = data['Age'].astype(int)
+data
+
+#Menghitung modus dari kolom 'Sex'
+mode_sex = data['Sex'].mode()[0]
+
+#Mengisi nilai yang hilang dengan modus
+data['Sex'] = data['Sex'].fillna(mode_sex)
+data
+
+data.isna().sum()
+
+data['Sex'].replace(['M'], '0', inplace = True)
+data['Sex'].replace(['F'], '1', inplace = True)
+
+data['ChestPainType'].replace(['TA'], '0', inplace = True)
+data['ChestPainType'].replace(['ATA'], '1', inplace = True)
+data['ChestPainType'].replace(['NAP'], '2', inplace = True)
+data['ChestPainType'].replace(['ASY'], '3', inplace = True)
+
+data['RestingECG'].replace(['Normal'], '0', inplace = True)
+data['RestingECG'].replace(['ST'], '1', inplace = True)
+data['RestingECG'].replace(['LVH'], '2', inplace = True)
+
+data['ExerciseAngina'].replace(['N'], '0', inplace = True)
+data['ExerciseAngina'].replace(['Y'], '1', inplace = True)
+
+data['ST_Slope'].replace(['Up'], '0', inplace = True)
+data['ST_Slope'].replace(['Flat'], '1', inplace = True)
+data['ST_Slope'].replace(['Down'], '2', inplace = True)
+
+data['Sex'] = data['Sex'].astype(int)
+data['ChestPainType'] = data['ChestPainType'].astype(int)
+data['MaxHR'] = data['MaxHR'].astype(int)
+data['ExerciseAngina'] = data['ExerciseAngina'].astype(int)
+data['ST_Slope'] = data['MaxHR'].astype(int)
+data['RestingECG'] = data['RestingECG'].astype(int)
+data
+
+for i in data.columns :
+  if data[i].dtype == 'float64' :
+    data[i] = data[i].astype('int')
+
+data.dtypes
+
+x = data.iloc[:, :-1]
+y = data.iloc[:, -1]
+
+import plotly.express as px
+
+fig = px.bar(data['HeartDisease'].value_counts(),
+             x = data['HeartDisease'].value_counts().index,
+             y = data['HeartDisease'].value_counts().values,
+             labels = {'x': 'HeartDisease', 'y': 'Jumlah'},
+             title = "Persentase Kelas",
+             color = data['HeartDisease'].value_counts().index)
+
+#Menampilkan grafik
+fig.show()
+
+from sklearn.model_selection import train_test_split
+#Pisahkan dataset menjadi data latih dan data uji
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.2)
+x_train.shape, x_test.shape, y_train.shape, y_test.shape
+
+#ALGORITMA DECISION TREE
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+model = DecisionTreeClassifier()
+
+#Melatih model menggunakan data latih
+model.fit(x_train, y_train)
+
+#Melakukan prediksi pada data uji
+y_pred = model.predict(x_test)
+
+#Evaluasi model
+accuracy = accuracy_score(y_test, y_pred)
+accuracy = accuracy*100
+report = classification_report(y_test, y_pred)
+
+#Menampilkan hasil evaluasi
+print(f'Accuracy: {accuracy:.2f}')
+print('\nClassification Report:\n', report)
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+f, ax = plt.subplots(figsize = (8,5))
+sns.heatmap(confusion_matrix(y_test, y_pred), annot = True, fmt = ".0f", ax = ax)
+plt.title("Counfusion Matrix Decision Tree")
+plt.xlabel("Predicted Label")
+plt.ylabel("True Label")
+plt.show()
+
+#ALGORITMA NAIVE BAYES (BERNOULLI)
+from sklearn.naive_bayes import BernoulliNB
+#Inisialisasi model Naive Bayes
+model2 = BernoulliNB()
+
+#Melatih model menggunakan data latih
+model2.fit(x_train, y_train)
+
+#Melakukan prediksi pada data uji
+y_pred2 = model2.predict(x_test)
+
+#Evaluasi model
+accuracy = accuracy_score(y_test, y_pred2)
+accuracy = accuracy*100
+report = classification_report(y_test, y_pred2)
+
+#Menampilkan hasil evaluasi
+print(f'Accuracy: {accuracy:.2f}')
+print('\nClassification Report:\n', report)
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+f, ax = plt.subplots(figsize = (8,5))
+sns.heatmap(confusion_matrix(y_test, y_pred2), annot = True, fmt = ".0f", ax = ax)
+plt.title("Counfusion Matrix Bernoulli")
+plt.xlabel("Predicted Label")
+plt.ylabel("True Label")
+plt.show()
+
+#DATA DUMMY
+import pandas as pd
+import numpy as np
+
+#Membuat data dummy
+np.random.seed(42)  # Untuk reproducibility
+
+#Jumlah baris data yang ingin dibuat
+n_rows = 100
+
+#Kolom 'age' dengan nilai acak antara 30 dan 70
+age = np.random.randint(30, 71, size = n_rows)
+
+#Kolom 'sex' dengan nilai acak 0 (female) atau 1 (male)
+sex = np.random.randint(0, 2, size = n_rows)
+
+#Kolom 'chestpaintype' dengan nilai acak antara 0 dan 3
+chest_pain_type = np.random.randint(0, 4, size = n_rows)
+
+#Kolom 'restingBP' dengan nilai acak antara 90 dan 160
+resting_BP = np.random.randint(90, 161, size = n_rows)
+
+#Kolom 'fastingBS' dengan nilai acak 0 (normal) atau 1 (high)
+fasting_BS = np.random.randint(0, 2, size = n_rows)
+
+#Kolom 'RestingECG' dengan nilai acak antara 0 dan 2
+resting_ECG = np.random.randint(0, 3, size = n_rows)
+
+#Kolom 'MaxHR' dengan nilai acak antara 120 dan 200
+max_HR = np.random.randint(120, 201, size = n_rows)
+
+#Kolom 'exerciseangina' dengan nilai acak 0 (no) atau 1 (yes)
+exercise_angina = np.random.randint(0, 2, size = n_rows)
+
+#Kolom 'oldpeak' dengan nilai acak antara 0.0 dan 6.0
+old_peak = np.round(np.random.uniform(0.0, 6.0, size = n_rows), decimals = 1)
+
+#Kolom 'st_slope' dengan nilai acak antara 0 dan 2
+st_slope = np.random.randint(0, 3, size = n_rows)
+
+#Kolom 'heartdisease' dengan nilai acak 0 (no) atau 1 (yes)
+heart_disease = np.random.randint(0, 2, size = n_rows)
+
+#Membuat DataFrame
+df = pd.DataFrame({
+    'age': age,
+    'sex': sex,
+    'chestpaintype': chest_pain_type,
+    'restingBP': resting_BP,
+    'fastingBS': fasting_BS,
+    'RestingECG': resting_ECG,
+    'MaxHR': max_HR,
+    'exerciseangina': exercise_angina,
+    'oldpeak': old_peak,
+    'st_slope': st_slope,
+    'heartdisease': heart_disease
+})
+
+#Menampilkan lima baris pertama dari data
+print(df.head())
+
+f1 = 37
+f2 = 0
+f3 = 3
+f4 = 96
+f5 = 1
+f6 = 0
+f7 = 142
+f8 = 0
+f9 = 0
+f10 = 5
+f11 = 1
+f12 = 1
+
+input = np.array([[f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11]])
+if model2.predict(input) == 0 :
+  print("HeartDisease")
+else :
+  print("Normal")
+
+corr = data.corr()
+corr.abs()
